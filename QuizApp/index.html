@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <script src="questions.js"></script>
+</head>
+
+<body>
+    <div class="quiz_body">
+        <div style="margin-left: 400px; text-transform: uppercase;padding-top: 15px;height: 50px;;">
+            <p><b>QUiz   Application</b></p>
+        </div>
+        <div class="content">
+            <h2 id="question"></h2>
+            <ul id="options" style="list-style-type: none;"></ul>
+            <button id="next-button" class="button" style="vertical-align:middle" disabled><span>Next</span></button>
+            <p id="score" style="display: none; margin-left: 35%;"></p>
+            <p id="msg" style="display: none; margin-left:23%;"></p>
+            <button id="return-button" style="display: none; width:200px; height:80px; border: none;
+                 background-color: rgb(193, 175, 152);margin-left:32%;margin-top: 15% ; border-radius: 4px;">
+                <b>Return to Quiz</b></button>
+
+        </div>
+    </div>
+
+
+
+    <script>
+
+
+    
+
+        // logic of quiz
+
+        // Get DOM elements
+        const questionElement = document.getElementById("question");
+        const optionsElement = document.getElementById("options");
+        const nextButton = document.getElementById("next-button");
+        const returnButton = document.getElementById("return-button");
+        const scoreElement = document.getElementById("score");
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let countdown;
+        let answered = false; // Flag to track if the question has been answered
+
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionElement.textContent = currentQuestion.question;
+            optionsElement.innerHTML = "";
+            currentQuestion.options.forEach((option) => {
+                const li = document.createElement("li");
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.style.borderRadius = "7px";
+                button.addEventListener("click", () => {
+                    handleAnswer(option);
+                });
+                li.appendChild(button);
+                optionsElement.appendChild(li);
+            });
+
+            // set a timer for 15 seconds
+            let timeLeft = 15;
+            const timerElement = document.createElement("p");
+            timerElement.textContent = `Time left: ${timeLeft} seconds`;
+            optionsElement.appendChild(timerElement);
+            countdown = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = `Time left: ${timeLeft} seconds`;
+                if (timeLeft === 0) {
+                    clearInterval(countdown);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function handleAnswer(option) {
+            if (answered) {
+                return; // If the question has already been answered, do nothing
+            }
+            const currentQuestion = questions[currentQuestionIndex];
+            const userAnswer = option;
+            clearInterval(countdown); // Clear the timer interval
+            answered = true; // Set the answered flag
+            if (userAnswer === currentQuestion.answer) {
+
+                score++;
+            }
+            nextButton.disabled = false;
+        }
+
+        function handleTimeout() {
+            answered = true; // Set the answered flag
+            nextButton.disabled = false;
+        }
+
+        function getNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questions.length) {
+                // Show final score and return button
+                let msg = document.getElementById("msg");
+
+                if (score == 5 || score == 4)
+                    msg.textContent = "YOU CAN BE PROUD OF YOURSELF!";
+                else if (score == 3)
+                    msg.textContent = "PRACTICE ON IT AGAIN";
+                else
+                    msg.textContent = "YOU MAY BE GOOD IF YOU STUDY MORE";
+
+                scoreElement.textContent = `Your score is: ${score} / ${questions.length}`;
+                msg.style.display = "block";
+                questionElement.style.display = "none";
+                optionsElement.style.display = "none";
+                nextButton.style.display = "none";
+                scoreElement.style.display = "block";
+                returnButton.style.display = "block";
+            } else {
+                answered = false; // Reset the answered flag
+                showQuestion();
+                nextButton.disabled = true;
+            }
+        }
+
+        nextButton.addEventListener("click", getNextQuestion);
+        returnButton.addEventListener("click", () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            questionElement.style.display = "block";
+            optionsElement.style.display = "block";
+            scoreElement.style.display = "none";
+            msg.style.display = "none";
+            returnButton.style.display = "none";
+            nextButton.style.display = "block";
+            showQuestion();
+        });
+
+        // Show the first question when the page is loaded
+        showQuestion();
+
+    </script>
+
+
+
+</body>
+
+</html>
